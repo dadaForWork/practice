@@ -2,47 +2,108 @@
 #include <stdlib.h> 
 #include <time.h>
 #include <windows.h>
+#include <conio.h>
 
 
-//±N¥ú¼Ğ«ü¨ì«ü©w¦ì¸m 
-void gotoXY(int x,int y){
+#define OFFSETX 1
+#define OFFSETY 2
+#define GAPX 3
+#define GAPY 1
+#define INSWITCH 11
+
+int sizex,sizey;
+//å°‡å…‰æ¨™æŒ‡åˆ°æŒ‡å®šä½ç½® 
+bool gotoXY(int x,int y){
+	if(x>((sizex-1)*GAPX) || y>((sizey-1)*GAPY) || x<0 || y<0 )return false;
 	HANDLE hout;
 	hout = GetStdHandle(STD_OUTPUT_HANDLE);
-	COORD pos = {x,y};
+	COORD pos = {x+OFFSETX,y+OFFSETY};
 	SetConsoleCursorPosition(hout, pos);
+	
+	return true;
+}
+
+bool checkMap(int** map,int ch){
+	if(ch!=32&&ch!=70&&ch!=102)return true;
+}
+
+int Input(int input,int x,int y){
+	switch(input){
+		case 72:
+			//up
+			if(gotoXY(x,y-GAPY))return INSWITCH-1;
+			return INSWITCH;
+
+		case 75:
+			//left
+			if(gotoXY(x-GAPX,y))return INSWITCH-10;
+			return INSWITCH;
+			
+		case 77:
+			//right
+			if(gotoXY(x+GAPX,y))return INSWITCH+10;
+			return INSWITCH;
+			
+		case 80:
+			//down
+			if(gotoXY(x,y+GAPY))return INSWITCH+1;
+			return INSWITCH;
+			
+		case 32:
+			//space
+			gotoXY(x,y);
+			printf("S");
+			return INSWITCH;
+			
+		case 70:
+		case 102:
+			//set flag
+			gotoXY(x,y);
+			printf("F");
+			return INSWITCH;
+			
+		default:
+			//other
+			return INSWITCH;
+	}
+	
 }
 
 
 int main(){
-	int sizex,sizey,bumbnum;
+	int bumbnum;
 	
 	
 	while(true){
 		/*
-		**	¿ï³æ 
+		**	é¸å–® 
 		*/
 	
-		//¿é¤J¦a¹Ï¤j¤p 
-		printf("¿é¤J¦a¹Ï¤j¤p(½d¨Ò:9*9)¡G");
+		//è¼¸å…¥åœ°åœ–å¤§å° 
+		printf("è¼¸å…¥åœ°åœ–å¤§å°(ç¯„ä¾‹:9*9)ï¼š");
 		scanf("%d*%d",&sizex,&sizey);
-		int map[sizex][sizey];
 		
-		//¿é¤J¬µ¼u¼Æ¶q
-		printf("¿é¤J¬µ¼u¼Æ¶q¡G");
+		int map[sizex][sizey];
+//		int 
+//		int** map2 = (int*)
+		
+		
+		//è¼¸å…¥ç‚¸å½ˆæ•¸é‡
+		printf("è¼¸å…¥ç‚¸å½ˆæ•¸é‡ï¼š");
 		scanf("%d",&bumbnum);
 		int bumb[bumbnum];
 		
-		//¬µ¼u¼Æ¤£¯à¶W¹LÁ`®æ¼Æ ­Y¶W¹L«h²×¤îµ{¦¡ 
+		//ç‚¸å½ˆæ•¸ä¸èƒ½è¶…éç¸½æ ¼æ•¸ è‹¥è¶…éå‰‡çµ‚æ­¢ç¨‹å¼ 
 		if(bumbnum>(sizex*sizey)){
-			printf("¬µ¼u¼Æ¶q¶W¹LÁ`®æ¼Æ¡A«ö¥ô·NÁä°h¥Xµ{¦¡");
+			printf("ç‚¸å½ˆæ•¸é‡è¶…éç¸½æ ¼æ•¸ï¼ŒæŒ‰ä»»æ„éµé€€å‡ºç¨‹å¼");
 			exit(0);
 		} 
 		
-		//¶Ã¼Æ²£¥Í¬µ¼u 
+		//äº‚æ•¸ç”¢ç”Ÿç‚¸å½ˆ 
 		srand( time(NULL) );
 		for(int i=0;i<bumbnum;i++){
 			bumb[i]=rand()%(sizex*sizey)+1;
-			//§PÂ_¬µ¼u¬O§_­«½Æ 
+			//åˆ¤æ–·ç‚¸å½ˆæ˜¯å¦é‡è¤‡ 
 			for(int j=0;j<i;j++){
 				if(bumb[i]==bumb[j]) {	
 					i--; 
@@ -54,19 +115,19 @@ int main(){
 		
 		system("cls");
 		
-		//¦L¥Xªì©l¦a¹Ï 
+		//å°å‡ºåˆå§‹åœ°åœ– 
 		for(int i=0;i<sizex;i++){
 			for(int j=0;j<sizey;j++){
-				//¦a¹Ï²M0 
+				//åœ°åœ–æ¸…0 
 				map[i][j]=0;
 				
-				//¦L¦b«ü©w¦ì¸m 
-				gotoXY(i*3,j);
+				//å°åœ¨æŒ‡å®šä½ç½® 
+				gotoXY(i*GAPX,j*GAPY);
 				printf("*");
 			}
 		}
 		
-	//	//¬µ¼u¦ì¸m 
+	//	//ç‚¸å½ˆä½ç½® 
 	//	for(int i=0;i<bumbnum;i++){
 	//		int bumb_x = bumb[i]%sizey;
 	//		int bumb_y = bumb[i]/sizey;
@@ -76,13 +137,13 @@ int main(){
 	//		
 	//	}
 	
-		//±N¬µ¼u©ñ¤J¦a¹Ï¤º ¦a¹Ï¥ª¤W¨¤¬°0¸¹¨Ì§Ç¥Ñ¥k¤U»¼¼W ¬µ¼u¼Æ­È¬°10 
+		//å°‡ç‚¸å½ˆæ”¾å…¥åœ°åœ–å…§ åœ°åœ–å·¦ä¸Šè§’ç‚º0è™Ÿä¾åºç”±å³ä¸‹éå¢ ç‚¸å½ˆæ•¸å€¼ç‚º10 
 		for(int i=0;i<bumbnum;i++){
 			int bumb_x = bumb[i]%sizey;
 			int bumb_y = bumb[i]/sizey;
 			
 			map[bumb_x][bumb_y]=10; 
-			//­pºâ¤E®c®æ¤º¬O§_¦³¬µ¼u ¬µ¼uÅıªşªñ¤E®c®æ¥[¤@---------------------------------------------
+			//è¨ˆç®—ä¹å®®æ ¼å…§æ˜¯å¦æœ‰ç‚¸å½ˆ ç‚¸å½ˆè®“é™„è¿‘ä¹å®®æ ¼åŠ ä¸€---------------------------------------------
 			for(int x=bumb_x-1;x<=bumb_x+1;x++){
 				for(int y=bumb_y-1;y<=bumb_y+1;y++){
 					if(x>=0 && y>=0 && x<sizex && y<sizey && map[x][y]!=10){
@@ -93,10 +154,10 @@ int main(){
 			}
 		}
 		
-	//	//¬d¬İ¦a¹Ï 
+	//	//æŸ¥çœ‹åœ°åœ– 
 	//	for(int i=0;i<sizex;i++){
 	//		for(int j=0;j<sizey;j++){
-	//			gotoXY(i*3,j);
+	//			gotoXY(i*GAPX+OFFSETX,j*GAPY+OFFSETY);
 	//			if(map[i][j]==10){
 	//				printf("B");
 	//			}
@@ -108,11 +169,25 @@ int main(){
 	//	}
 	
 		
-		
-		//¶}©l¹CÀ¸ 
-		while(true){
-		
-	
+		int ch,x=0,y=0;
+		gotoXY(x,y);
+		//é–‹å§‹éŠæˆ² 
+		while(ch = getch()){
+
+			if(ch==224)continue;
+//			printf("%d\n",ch);
+			
+//			if(checkMap(map,ch)){
+				int tem = Input(ch,x,y)-INSWITCH;
+				x+=tem/10*GAPX;
+				y+=tem%10*GAPY;
+//			}
+			
+			
+
+			
+			
+
 			
 			
 			
