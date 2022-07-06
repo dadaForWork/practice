@@ -4,6 +4,10 @@
 #include <windows.h>
 #include <conio.h>
 
+typedef int bool;
+#define true 1
+#define false 0
+
 
 #define OFFSETX 1
 #define OFFSETY 2
@@ -23,10 +27,37 @@ bool gotoXY(int x,int y){
 	return true;
 }
 
-bool checkMap(int** map,int ch){
-	if(ch!=32&&ch!=70&&ch!=102)return true;
+//印出指定位置
+void printS(char ch,int x,int y){
+	gotoXY(x,y);
+	printf("%c",ch);
+	gotoXY(x,y);
 }
 
+//判斷規則 
+bool checkMap(int** map,int ch,int x,int y){
+	if(ch!=32&&ch!=70&&ch!=102)return true;
+	switch(ch){
+		case 32:
+			//space
+			if(map[x][y]==10){
+				//Game Over
+				printS('B',x,y);
+//				return false;
+			}
+			
+		case 70:
+		case 102:
+			//flag
+			gotoXY(x,y);
+			printf("F");
+			gotoXY(x,y);
+			return INSWITCH;
+	}
+}
+
+
+//輸入 
 int Input(int input,int x,int y){
 	switch(input){
 		case 72:
@@ -51,15 +82,13 @@ int Input(int input,int x,int y){
 			
 		case 32:
 			//space
-			gotoXY(x,y);
-			printf("S");
+			printS('S',x,y);
 			return INSWITCH;
 			
 		case 70:
 		case 102:
 			//set flag
-			gotoXY(x,y);
-			printf("F");
+			printS('F',x,y);
 			return INSWITCH;
 			
 		default:
@@ -70,22 +99,31 @@ int Input(int input,int x,int y){
 }
 
 
+
+
 int main(){
-	int bumbnum;
+	int bumbnum,i,j,x,y;
 	
 	
 	while(true){
 		/*
 		**	選單 
 		*/
+		
+		bool gameover=false;
 	
 		//輸入地圖大小 
 		printf("輸入地圖大小(範例:9*9)：");
 		scanf("%d*%d",&sizex,&sizey);
 		
-		int map[sizex][sizey];
-//		int 
-//		int** map2 = (int*)
+//		int map[sizex][sizey];
+		//calloc: 將內容清0，malloc: 不會清0 
+		int **map = calloc(sizex, sizeof(int*));	
+		
+		//每一列有 sizey 個行 
+		for(i=0;i<sizex;i++){
+			map[i] = calloc(sizey, sizeof(int*)); 
+		}
 		
 		
 		//輸入炸彈數量
@@ -101,10 +139,10 @@ int main(){
 		
 		//亂數產生炸彈 
 		srand( time(NULL) );
-		for(int i=0;i<bumbnum;i++){
+		for(i=0;i<bumbnum;i++){
 			bumb[i]=rand()%(sizex*sizey)+1;
 			//判斷炸彈是否重複 
-			for(int j=0;j<i;j++){
+			for(j=0;j<i;j++){
 				if(bumb[i]==bumb[j]) {	
 					i--; 
 					break;
@@ -116,19 +154,17 @@ int main(){
 		system("cls");
 		
 		//印出初始地圖 
-		for(int i=0;i<sizex;i++){
-			for(int j=0;j<sizey;j++){
-				//地圖清0 
-				map[i][j]=0;
+		for(i=0;i<sizex;i++){
+			for(j=0;j<sizey;j++){
 				
 				//印在指定位置 
-				gotoXY(i*GAPX,j*GAPY);
-				printf("*");
+				printS('*',i*GAPX,j*GAPY);
+	
 			}
 		}
 		
 	//	//炸彈位置 
-	//	for(int i=0;i<bumbnum;i++){
+	//	for(i=0;i<bumbnum;i++){
 	//		int bumb_x = bumb[i]%sizey;
 	//		int bumb_y = bumb[i]/sizey;
 	//		
@@ -138,14 +174,14 @@ int main(){
 	//	}
 	
 		//將炸彈放入地圖內 地圖左上角為0號依序由右下遞增 炸彈數值為10 
-		for(int i=0;i<bumbnum;i++){
+		for(i=0;i<bumbnum;i++){
 			int bumb_x = bumb[i]%sizey;
 			int bumb_y = bumb[i]/sizey;
 			
 			map[bumb_x][bumb_y]=10; 
 			//計算九宮格內是否有炸彈 炸彈讓附近九宮格加一---------------------------------------------
-			for(int x=bumb_x-1;x<=bumb_x+1;x++){
-				for(int y=bumb_y-1;y<=bumb_y+1;y++){
+			for(x=bumb_x-1;x<=bumb_x+1;x++){
+				for(y=bumb_y-1;y<=bumb_y+1;y++){
 					if(x>=0 && y>=0 && x<sizex && y<sizey && map[x][y]!=10){
 						map[x][y]++;
 					}
@@ -171,17 +207,23 @@ int main(){
 		
 		int ch,x=0,y=0;
 		gotoXY(x,y);
-		//開始遊戲 
+		
+		/* 
+		 *開始遊戲 
+		*/ 
+		 
 		while(ch = getch()){
+			
+//			if(gameover==true)break;
 
 			if(ch==224)continue;
 //			printf("%d\n",ch);
 			
-//			if(checkMap(map,ch)){
+			if(checkMap(map,ch,x,y)){
 				int tem = Input(ch,x,y)-INSWITCH;
 				x+=tem/10*GAPX;
 				y+=tem%10*GAPY;
-//			}
+			}
 			
 			
 
@@ -197,6 +239,9 @@ int main(){
 		
 		}	
 		
+		/* 
+		 *結束畫面 
+		*/ 
 	}
 	 
 	 
