@@ -130,6 +130,45 @@ void showTime(int time){
 	printf("%02d:%02d",min,sec);
 }
 
+void openChain(int**map,int x,int y){
+	int showX=x*GAPX,showY=y*GAPY;
+	if(x>(sizex-1) || y>(sizey-1) || x<0 || y<0)return;
+	
+	if(map[x][y]==0){
+		
+		
+		int i,j;
+		for(i=-1;i<=1;i++){
+			for(j=-1;j<=1;j++){
+				if(i==j && i==0)continue;
+				printS('0',showX,showY);
+				map[x][y]=SPACE;
+				openChain(map,x+i,y+j);
+			}
+		}
+	}
+	else{
+		switch(map[x][y]){
+			case 1:
+			case 2:
+			case 3:
+			case 4:
+			case 5:
+			case 6:
+			case 7:
+			case 8:
+			case 9:
+				gotoXY(showX,showY);
+				printf("%d",map[x][y]);
+				gotoXY(showX,showY);
+				break;
+			default:
+				break;
+		}
+	}
+	return;
+}
+
 
 
 
@@ -293,11 +332,17 @@ int main(){
 						break;
 					}
 					else{
-						gotoXY(showX,showY);
-						printf("%d",map[x][y]);
-						gotoXY(showX,showY);
+						if(map[x][y]==0){
+							openChain(map,x,y);
+						}
+						else{
+							gotoXY(showX,showY);
+							printf("%d",map[x][y]);
+							gotoXY(showX,showY);
+							
+							map[x][y]=SPACE;
+						}
 						
-						map[x][y]=SPACE;
 						continue;
 					}
 				}
