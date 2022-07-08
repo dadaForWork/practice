@@ -29,6 +29,7 @@
 #define BUMB 10
 #define FLAG 11
 #define SPACE 12
+#define ESC 27
 
 int sizex,sizey;
 //將光標指到指定位置 
@@ -455,7 +456,11 @@ int main(){
 			printf("用時 %02d:%02d\n",min,sec);
 		}
 		
-		system("pause");
+		printf("請按ESC再來一輪");
+		while(ch=getch()){
+			
+			if(ch==ESC)break;
+		}
 		
 		system("cls");
 	}
