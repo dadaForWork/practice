@@ -122,6 +122,14 @@ int Input(int input,int x,int y){
 	
 }
 
+void showTime(int time){
+	int min = time/60;
+	int sec = time%60;
+	
+	gotoXYSys(((sizex-1)*GAPX+10),((sizey-1)*GAPY+5));
+	printf("%02d:%02d",min,sec);
+}
+
 
 
 
@@ -244,13 +252,22 @@ int main(){
 		int ch,x=0,y=0,countFlag=0;
 		bool gameover=false,youWin=false;
 		gotoXY(x,y);
-		
+		time_t startTime,nowTime,lastTime;
+		time(&startTime);
+		lastTime=startTime;
 		
 		/* 
 		 *開始遊戲 
 		*/ 
 		 
 		while(ch = getch()){
+			
+			time(&nowTime);
+			if(nowTime>lastTime){
+				
+				showTime(nowTime-startTime);
+				lastTime=nowTime;
+			}
 			
 
 			if(ch==224)continue;
@@ -270,6 +287,8 @@ int main(){
 				else{
 					if(map[x][y]==BUMB){
 						//GAME OVER
+						
+						lastTime = nowTime;
 						gameover=true;
 						break;
 					}
@@ -302,6 +321,8 @@ int main(){
 					if(countFlag==bumbnum){
 						//判斷是否GAME OVER 
 						
+						lastTime = nowTime;
+						
 						system("cls");
 						
 						for(int i=0;i<sizex;i++){
@@ -309,6 +330,8 @@ int main(){
 								
 								int showX=i*GAPX,showY=j*GAPY;
 								gotoXY(showX,showY);
+								
+								
 								
 								// 地圖內容 1.數字 2.SPACE 3.FLAG 4.BUMB 
 								switch(map[i][j]){
@@ -376,9 +399,15 @@ int main(){
 		system("cls");
 		if(gameover){
 			printf("GAME OVER!!\n");
+			int useTime = lastTime - startTime;
+			int min = useTime/60,sec = useTime%60;
+			printf("用時 %02d:%02d\n",min,sec);
 		}
 		if(youWin){
 			printf("恭喜你，成功了!!!\n");
+			int useTime = lastTime - startTime;
+			int min = useTime/60,sec = useTime%60;
+			printf("用時 %02d:%02d\n",min,sec);
 		}
 		
 		system("pause");
