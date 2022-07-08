@@ -242,7 +242,7 @@ int main(){
 	
 		
 		int ch,x=0,y=0,countFlag=0;
-		bool gameover=false;
+		bool gameover=false,youWin=false;
 		gotoXY(x,y);
 		
 		
@@ -270,7 +270,7 @@ int main(){
 				else{
 					if(map[x][y]==BUMB){
 						//GAME OVER
-						
+						gameover=true;
 						break;
 					}
 					else{
@@ -289,6 +289,7 @@ int main(){
 				if(map[x][y]==FLAG){
 					printS('*',showX,showY);
 					map[x][y] = originMap[x][y];
+					countFlag-=1;
 					continue;
 				}
 				else if(map[x][y]==SPACE){
@@ -337,6 +338,7 @@ int main(){
 						}
 						gotoXYSys(sizex*GAPX,sizey*GAPY);
 						system("pause"); 
+						if(!gameover)youWin=true;
 						
 					}
 				}
@@ -354,6 +356,7 @@ int main(){
 			
 			
 			if(gameover)break;
+			if(youWin)break;
 			
 			
 
@@ -371,7 +374,13 @@ int main(){
 		*/ 
 		
 		system("cls");
-		printf("GAME OVER!!\n");
+		if(gameover){
+			printf("GAME OVER!!\n");
+		}
+		if(youWin){
+			printf("恭喜你，成功了!!!\n");
+		}
+		
 		system("pause");
 		
 		system("cls");
