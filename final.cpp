@@ -1,12 +1,13 @@
-#include<stdio.h>
+#include <stdio.h>
 #include <stdlib.h> 
 #include <time.h>
 #include <windows.h>
 #include <conio.h>
 
-typedef int bool;
-#define true 1
-#define false 0
+//typedef int bool;
+//#define true 1
+//#define false 0
+
 
 
 #define OFFSETX 1
@@ -14,6 +15,20 @@ typedef int bool;
 #define GAPX 3
 #define GAPY 1
 #define INSWITCH 11
+
+
+#define KEY_SPACE 32
+#define KEY_FLAG_UPPER 70
+#define KEY_FLAG_LOWER 102
+#define KEY_UP 72
+#define KEY_LEFT 75
+#define KEY_RIGHT 77
+#define KEY_DOWN 80
+
+
+#define BUMB 10
+#define FLAG 11
+#define SPACE 12
 
 int sizex,sizey;
 //將光標指到指定位置 
@@ -36,57 +51,66 @@ void printS(char ch,int x,int y){
 
 //判斷規則 
 bool checkMap(int** map,int ch,int x,int y){
-	if(ch!=32&&ch!=70&&ch!=102)return true;
+	if( ch!=KEY_SPACE && ch!=KEY_FLAG_UPPER && ch!=KEY_FLAG_LOWER )return true;
 	switch(ch){
-		case 32:
+		case KEY_SPACE:
 			//space
-			if(map[x][y]==10){
+			if(map[x/GAPX][y/GAPY]==10){
 				//Game Over
 				printS('B',x,y);
 //				return false;
 			}
+			return false;
 			
-		case 70:
-		case 102:
+		case KEY_FLAG_UPPER:
+		case KEY_FLAG_LOWER:
 			//flag
 			gotoXY(x,y);
 			printf("F");
 			gotoXY(x,y);
-			return INSWITCH;
+			return false;
 	}
+}
+
+void gotoXYSys(int x,int y){
+	HANDLE hout;
+	hout = GetStdHandle(STD_OUTPUT_HANDLE);
+	COORD pos = {x+OFFSETX,y+OFFSETY};
+	SetConsoleCursorPosition(hout, pos);
+	
 }
 
 
 //輸入 
 int Input(int input,int x,int y){
 	switch(input){
-		case 72:
+		case KEY_UP:
 			//up
 			if(gotoXY(x,y-GAPY))return INSWITCH-1;
 			return INSWITCH;
 
-		case 75:
+		case KEY_LEFT:
 			//left
 			if(gotoXY(x-GAPX,y))return INSWITCH-10;
 			return INSWITCH;
 			
-		case 77:
+		case KEY_RIGHT:
 			//right
 			if(gotoXY(x+GAPX,y))return INSWITCH+10;
 			return INSWITCH;
 			
-		case 80:
+		case KEY_DOWN:
 			//down
 			if(gotoXY(x,y+GAPY))return INSWITCH+1;
 			return INSWITCH;
 			
-		case 32:
+		case KEY_SPACE:
 			//space
 			printS('S',x,y);
 			return INSWITCH;
 			
-		case 70:
-		case 102:
+		case KEY_FLAG_UPPER:
+		case KEY_FLAG_LOWER:
 			//set flag
 			printS('F',x,y);
 			return INSWITCH;
@@ -110,7 +134,7 @@ int main(){
 		**	選單 
 		*/
 		
-		bool gameover=false;
+		
 	
 		//輸入地圖大小 
 		printf("輸入地圖大小(範例:9*9)：");
@@ -118,12 +142,22 @@ int main(){
 		
 //		int map[sizex][sizey];
 		//calloc: 將內容清0，malloc: 不會清0 
-		int **map = calloc(sizex, sizeof(int*));	
+		int **map = (int**)calloc(sizex, sizeof(int*));	
 		
 		//每一列有 sizey 個行 
 		for(i=0;i<sizex;i++){
-			map[i] = calloc(sizey, sizeof(int*)); 
+			map[i] = (int*)calloc(sizey, sizeof(int*)); 
 		}
+		
+		
+		//更改狀態使用 map，originMap 在插滿旗子時用來判斷 
+		int **originMap = (int**)calloc(sizex, sizeof(int*));	
+		
+		//每一列有 sizey 個行 
+		for(i=0;i<sizex;i++){
+			originMap[i] = (int*)calloc(sizey, sizeof(int*)); 
+		}
+		
 		
 		
 		//輸入炸彈數量
@@ -178,12 +212,14 @@ int main(){
 			int bumb_x = bumb[i]%sizey;
 			int bumb_y = bumb[i]/sizey;
 			
-			map[bumb_x][bumb_y]=10; 
+			map[bumb_x][bumb_y]=BUMB; 
+			originMap[bumb_x][bumb_y]=BUMB;
 			//計算九宮格內是否有炸彈 炸彈讓附近九宮格加一---------------------------------------------
 			for(x=bumb_x-1;x<=bumb_x+1;x++){
 				for(y=bumb_y-1;y<=bumb_y+1;y++){
 					if(x>=0 && y>=0 && x<sizex && y<sizey && map[x][y]!=10){
 						map[x][y]++;
+						originMap[x][y]++;
 					}
 					
 				}
@@ -205,8 +241,10 @@ int main(){
 	//	}
 	
 		
-		int ch,x=0,y=0;
+		int ch,x=0,y=0,countFlag=0;
+		bool gameover=false;
 		gotoXY(x,y);
+		
 		
 		/* 
 		 *開始遊戲 
@@ -214,19 +252,108 @@ int main(){
 		 
 		while(ch = getch()){
 			
-//			if(gameover==true)break;
 
 			if(ch==224)continue;
-//			printf("%d\n",ch);
 			
-			if(checkMap(map,ch,x,y)){
-				int tem = Input(ch,x,y)-INSWITCH;
-				x+=tem/10*GAPX;
-				y+=tem%10*GAPY;
+			
+			/*
+			 *判斷規則 
+			*/
+			
+			int showX=x*GAPX,showY=y*GAPY;
+			
+			//空白規則: 1.開過的不做事 2.有插旗的不做事 3.沒開過的顯示地圖資訊，判斷是否GAME OVER 4.
+			if(ch==KEY_SPACE){
+				if(map[x][y]==SPACE || map[x][y]==FLAG){
+					continue;
+				}
+				else{
+					if(map[x][y]==BUMB){
+						//GAME OVER
+						
+						break;
+					}
+					else{
+						gotoXY(showX,showY);
+						printf("%d",map[x][y]);
+						gotoXY(showX,showY);
+						
+						map[x][y]=SPACE;
+						continue;
+					}
+				}
+			}
+			
+			//插旗規則: 1.插過旗的取消插旗 2.空白的不做事 3.沒開過且沒插旗的插旗 3.旗子數達到炸彈數，判斷是否GAME OVER
+			else if(ch==KEY_FLAG_UPPER || ch==KEY_FLAG_LOWER){
+				if(map[x][y]==FLAG){
+					printS('*',showX,showY);
+					map[x][y] = originMap[x][y];
+					continue;
+				}
+				else if(map[x][y]==SPACE){
+					continue;
+				}
+				else{
+					printS('F',showX,showY);
+					map[x][y] = FLAG;
+					countFlag+=1;
+					if(countFlag==bumbnum){
+						//判斷是否GAME OVER 
+						
+						system("cls");
+						
+						for(int i=0;i<sizex;i++){
+							for(int j=0;j<sizey;j++){
+								
+								int showX=i*GAPX,showY=j*GAPY;
+								gotoXY(showX,showY);
+								
+								// 地圖內容 1.數字 2.SPACE 3.FLAG 4.BUMB 
+								switch(map[i][j]){
+									case FLAG:
+										printS('F',showX,showY);
+										break;
+									case BUMB:
+										printS('X',showX,showY);
+										gameover=true;
+										break; 
+									default:
+										gotoXY(showX,showY);
+										printf("%d",originMap[i][j]);
+										gotoXY(showX,showY);
+										break;
+									
+								}
+								
+								if(!gameover){
+									Sleep(100);
+								}
+								else{
+									Sleep(10);
+								} 
+								
+							}
+						}
+						gotoXYSys(sizex*GAPX,sizey*GAPY);
+						system("pause"); 
+						
+					}
+				}
+			}
+			
+			//上下左右規則: 不能超過邊界* 
+			else{
+				int tem = Input(ch,showX,showY)-INSWITCH;
+				x+=tem/10;
+				y+=tem%10;
 			}
 			
 			
-
+			
+			
+			
+			if(gameover)break;
 			
 			
 
@@ -242,6 +369,12 @@ int main(){
 		/* 
 		 *結束畫面 
 		*/ 
+		
+		system("cls");
+		printf("GAME OVER!!\n");
+		system("pause");
+		
+		system("cls");
 	}
 	 
 	 
