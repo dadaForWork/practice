@@ -450,7 +450,7 @@ int main(){
 			printf("用時 %02d:%02d\n",min,sec);
 		}
 		if(youWin){
-			printf("恭喜你，成功了!!!\n");
+			printf("恭喜你，成功\了!!!\n");
 			int useTime = lastTime - startTime;
 			int min = useTime/60,sec = useTime%60;
 			printf("用時 %02d:%02d\n",min,sec);
