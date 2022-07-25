@@ -29,7 +29,10 @@ int main(){
 	int inputX,inputY;
 	scanf("%d %d",&inputX,&inputY);
 	
-	checkerBoard[inputX+1][inputY+1]=2;
+	inputX+=1;
+	inputY+=1;
+	
+	checkerBoard[inputX][inputY]=2;
 	
 	//上
 	QueenGo(checkerBoard,inputX,inputY,0,-1);
