@@ -2,12 +2,12 @@
 #include <stdlib.h>
 
 
-void QueenGoLeft(int** checkerBoard,int queenPosX,int queenPosY,int offsetX,int offsetY){
+void QueenGo(int** checkerBoard,int queenPosX,int queenPosY,int offsetX,int offsetY){
 	queenPosX+=offsetX;
 	queenPosY+=offsetY;
 	if(checkerBoard[queenPosX][queenPosY]==-1)return;
 	checkerBoard[queenPosX][queenPosY]=1;
-	return QueenGoLeft(checkerBoard,queenPosX,queenPosY,offsetX,offsetY);
+	return QueenGo(checkerBoard,queenPosX,queenPosY,offsetX,offsetY);
 }
 
 
@@ -32,21 +32,21 @@ int main(){
 	checkerBoard[inputX+1][inputY+1]=2;
 	
 	//上
-	QueenGoLeft(checkerBoard,inputX,inputY,0,-1);
+	QueenGo(checkerBoard,inputX,inputY,0,-1);
 	//下 
-	QueenGoLeft(checkerBoard,inputX,inputY,0,1);
+	QueenGo(checkerBoard,inputX,inputY,0,1);
 	//左 
-	QueenGoLeft(checkerBoard,inputX,inputY,-1,0);
+	QueenGo(checkerBoard,inputX,inputY,-1,0);
 	//右 
-	QueenGoLeft(checkerBoard,inputX,inputY,1,0);
+	QueenGo(checkerBoard,inputX,inputY,1,0);
 	//左上 
-	QueenGoLeft(checkerBoard,inputX,inputY,-1,-1);
+	QueenGo(checkerBoard,inputX,inputY,-1,-1);
 	//右上 
-	QueenGoLeft(checkerBoard,inputX,inputY,1,-1);
+	QueenGo(checkerBoard,inputX,inputY,1,-1);
 	//左下 
-	QueenGoLeft(checkerBoard,inputX,inputY,-1,1);
+	QueenGo(checkerBoard,inputX,inputY,-1,1);
 	//右下  
-	QueenGoLeft(checkerBoard,inputX,inputY,1,1);
+	QueenGo(checkerBoard,inputX,inputY,1,1);
 	
 	
 	
